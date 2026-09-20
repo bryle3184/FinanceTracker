@@ -1,0 +1,91 @@
+/* ============================================================
+   FinanceTracker design tokens
+   Single source of truth for colors, type, spacing, shape.
+   Theme is switched via [data-theme="dark"] on <html>; the
+   inline index.html script pre-applies it to avoid FOUC.
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --color-brand: #001233;
+  --color-brand-soft: #0a2a5e;
+  --color-accent: #4cc9a4;
+  --color-accent-strong: #2fb98e;
+  --color-warn: #f4a261;
+  --color-danger: #e63946;
+  --color-info: #48bfe3;
+
+  /* Surfaces (light) */
+  --bg: #f5f7fb;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #edf1f7;
+  --surface: #ffffff;
+  --surface-hover: #f0f4fa;
+
+  /* Text (light) */
+  --text: #0f1b2d;
+  --text-muted: #5b6b82;
+  --text-faint: #8a99b3;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Misc */
+  --shadow-sm: 0 1px 2px rgba(15, 27, 45, 0.06);
+  --shadow-md: 0 4px 16px rgba(15, 27, 45, 0.08);
+  --shadow-lg: 0 12px 40px rgba(15, 27, 45, 0.14);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", Consolas, Monaco, monospace;
+  --fs-xs: 0.75rem;    /* 12 */
+  --fs-sm: 0.875rem;   /* 14 */
+  --fs-md: 1rem;       /* 16 */
+  --fs-lg: 1.25rem;    /* 20 */
+  --fs-xl: 1.625rem;   /* 26 */
+  --fs-2xl: 2.25rem;   /* 36 */
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --topbar-h: 60px;
+  --bottomnav-h: 60px;
+  --content-max: 1080px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 160ms;
+
+  /* Charts (recharts stroke/fill fall back to CSS vars in chartTheme.js) */
+  --chart-grid: var(--border);
+  --chart-tick: var(--text-faint);
+}
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --bg-elevated: #101a2e;
+  --bg-sunken: #0a0f1c;
+  --surface: #141f36;
+  --surface-hover: #1a2743;
+
+  --text: #e8edf6;
+  --text-muted: #9aa7bd;
+  --text-faint: #6b7c93;
+  --border: #243148;
+  --border-strong: #33425e;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
