@@ -4,9 +4,7 @@
   "framework": "vite",
   "installCommand": "npm install",
   "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs@22.x"
-    }
+    "api/**/*.js": {}
   },
   "env": {
     "DATABASE_URL": "DATABASE_URL",
