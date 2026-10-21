@@ -4,7 +4,7 @@ import { useStore } from '../../state/store.js';
 import { CURRENCIES } from '../../lib/money.js';
 import { useTheme } from '../../context/ThemeProvider.jsx';
 import MembersManager from './MembersManager.jsx';
-import SupabaseSection from './SupabaseSection.jsx';
+import CloudSection from './CloudSection.jsx';
 import pkg from '../../../package.json';
 
 const CHANGELOG = [
@@ -19,7 +19,7 @@ const CHANGELOG = [
       'Splits & settlement calculator — minimal transfers only',
       'Insights: 6-month trend, MoM, savings rate, anomaly detection, printable PDF report',
       'Month Review retrospective, CSV import, JSON backup/restore',
-      'Optional Supabase cloud sync (activate via .env)'
+      'Optional Neon cloud sync (deploy the API and set VITE_API_URL)'
     ]
   }
 ];
@@ -92,7 +92,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Cloud sync */}
-        <SupabaseSection />
+        <CloudSection />
 
         {/* What's new */}
         <div className="card">

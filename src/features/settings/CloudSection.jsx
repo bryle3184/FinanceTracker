@@ -1,19 +1,18 @@
 // @ts-check
 import { useState } from 'react';
-import { Cloud, CloudOff, LogIn, RefreshCw, ArrowUpToLine } from 'lucide-react';
+import { Cloud, CloudOff, LogIn, UserPlus, RefreshCw, ArrowUpToLine } from 'lucide-react';
 import { useStore } from '../../state/store.js';
-import { syncMode, signInWithPassword, signOut, pushSnapshot, pullSnapshot, isConfigured } from '../../lib/supabase.js';
+import { syncMode, signInWithPassword, signUp, signOut, pushSnapshot, pullSnapshot, isConfigured } from '../../lib/sync.js';
 import Field from '../../components/shared/Field.jsx';
 
 /**
- * Optional cloud sync. Only active when VITE_SUPABASE_URL + anon key are set
- * (see .env.example). Local mode is fully functional — this section just tells
- * the user why sync is greyed out.
+ * Cloud sync over Neon (Vercel serverless). Only active when the API is
+ * deployed — otherwise this section tells the user why it's greyed out.
  *
- * Flow: sign in -> on "Sync now" or "Migrate local → cloud", push the current
- * snapshot; on sign-in, if remote is newer, pull it. LWW by updated_at.
+ * Flow: sign in/up -> on "Sync now" or "Migrate local → cloud", push the
+ * current snapshot; on sign-in, if remote is newer, pull it. LWW by updatedAt.
  */
-export default function SupabaseSection() {
+export default function CloudSection() {
   const getPersistedData = useStore((s) => s.getPersistedData);
   const importState = useStore((s) => s.importState);
   const meta = useStore((s) => s.meta);
@@ -24,14 +23,16 @@ export default function SupabaseSection() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
 
-  const mode = syncMode();
-
-  const doSignIn = async () => {
-    if (mode !== 'configured') return;
+  const doAuth = async () => {
     setBusy(true);
     try {
-      await signInWithPassword({ email, password });
+      if (mode === 'signup') {
+        await signUp({ email, password });
+      } else {
+        await signInWithPassword({ email, password });
+      }
       setSignedIn(true);
       const remote = await pullSnapshot();
       if (remote.ok && remote.data && remote.updatedAt > (meta.lastSyncedAt || '')) {
@@ -41,7 +42,7 @@ export default function SupabaseSection() {
         await pushSnapshot(getPersistedData());
       }
       setLastSyncedAt(new Date().toISOString());
-      pushToast('Signed in + synced');
+      pushToast(mode === 'signup' ? 'Account created + synced' : 'Signed in + synced');
     } catch (err) {
       pushToast(err.message || 'Sign-in failed', 'error');
     } finally {
@@ -86,8 +87,8 @@ export default function SupabaseSection() {
         <div className="card-title"><CloudOff size={16} /> Cloud sync</div>
         <p className="muted" style={{ fontSize: 'var(--fs-sm)', marginTop: 0 }}>
           <span className="badge">local-only</span>
-          Everything is stored in this browser. To enable optional sync, add VITE_SUPABASE_URL and
-          VITE_SUPABASE_ANON_KEY to <code>.env</code> and rebuild.
+          Everything is stored in this browser. Deploy the API (see README) and set
+          <code>VITE_API_URL</code> to enable optional sync.
         </p>
       </div>
     );
@@ -98,7 +99,7 @@ export default function SupabaseSection() {
       <div className="card-title">
         <Cloud size={16} /> Cloud sync
         <span className="badge badge-accent" style={{ marginLeft: 'auto' }}>
-          {signedIn ? 'signed in' : 'configured'}
+          {signedIn ? 'signed in' : syncMode()}
         </span>
       </div>
 
@@ -108,8 +109,12 @@ export default function SupabaseSection() {
             <Field label="Email"><input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
             <Field label="Password"><input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
           </div>
-          <button className="btn btn-ghost" disabled={busy || !email || !password} onClick={doSignIn}>
-            <LogIn size={14} /> {busy ? 'Working…' : 'Sign in & sync'}
+          <button className="btn btn-ghost" disabled={busy || !email || !password} onClick={doAuth}>
+            {mode === 'signup' ? <UserPlus size={14} /> : <LogIn size={14} />}
+            {busy ? 'Working…' : mode === 'signup' ? 'Create account & sync' : 'Sign in & sync'}
+          </button>
+          <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} disabled={busy} onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}>
+            {mode === 'signup' ? 'Have an account? Sign in' : 'No account? Create one'}
           </button>
           <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} disabled={busy} onClick={doMigrate}>
             <ArrowUpToLine size={13} /> Upload local → cloud
@@ -120,7 +125,7 @@ export default function SupabaseSection() {
           <button className="btn btn-ghost" disabled={busy} onClick={doSync}>
             <RefreshCw size={14} /> {busy ? 'Syncing…' : 'Sync now'}
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={async () => { await signOut(); setSignedIn(false); pushToast('Signed out'); }}>
+          <button className="btn btn-ghost btn-sm" onClick={async () => { signOut(); setSignedIn(false); pushToast('Signed out'); }}>
             Sign out
           </button>
         </div>

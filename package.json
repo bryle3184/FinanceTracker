@@ -12,7 +12,8 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
+    "@neondatabase/serverless": "^1.2.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.454.0",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",

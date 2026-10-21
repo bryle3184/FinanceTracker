@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "npm install",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "env": {
+    "DATABASE_URL": "@neon-database-url",
+    "JWT_SECRET": "@jwt-secret"
+  }
+}

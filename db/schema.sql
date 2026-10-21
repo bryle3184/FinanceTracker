@@ -1,38 +1,31 @@
--- FinanceTracker optional cloud sync schema (Supabase PostgreSQL).
--- Run this in the Supabase SQL editor ONLY if you are enabling cloud sync.
--- Idempotent: can be re-run.
+-- FinanceTracker cloud sync schema (Neon / PostgreSQL).
+-- Run this in the Neon SQL editor. Idempotent: can be re-run.
 
--- One row per user, holding the full app snapshot as JSONB.
-create table if not exists public.profiles (
-  id uuid primary key references auth.users (id) on delete cascade,
-  data jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
+-- One user per account. Passwords are scrypt'd server-side; the client only
+-- holds a 30-day JWT.
+create table if not exists users (
+  id            text primary key,
+  email         text not null unique,
+  password_hash text not null,
+  created_at    timestamptz not null default now()
 );
 
-alter table public.profiles enable row level security;
-
--- Users can read/update only their own row.
-drop policy if exists profiles_select_own on public.profiles;
-create policy profiles_select_own on public.profiles
-  for select using (auth.uid() = id);
-
-drop policy if exists profiles_insert_own on public.profiles;
-create policy profiles_insert_own on public.profiles
-  for insert with check (auth.uid() = id);
-
-drop policy if exists profiles_update_own on public.profiles;
-create policy profiles_update_own on public.profiles
-  for update using (auth.uid() = id) with check (auth.uid() = id);
+-- One row per user, holding the full app snapshot as JSONB.
+create table if not exists snapshots (
+  user_id     text primary key references users (id) on delete cascade,
+  data        jsonb not null default '{}'::jsonb,
+  updated_at  timestamptz not null default now()
+);
 
 -- Bump updated_at on every upsert.
-create or replace function public.touch_profiles() returns trigger as $$
+create or replace function public.touch_snapshots() returns trigger as $$
 begin
   new.updated_at = now();
   return new;
 end;
 $$ language plpgsql;
 
-drop trigger if exists profiles_touch on public.profiles;
-create trigger profiles_touch
-  before update on public.profiles
-  for each row execute function public.touch_profiles();
+drop trigger if exists snapshots_touch on public.snapshots;
+create trigger snapshots_touch
+  before update on public.snapshots
+  for each row execute function public.touch_snapshots();
